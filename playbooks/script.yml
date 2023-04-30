@@ -1,0 +1,26 @@
+---
+
+ - hosts: webservers
+   become: yes
+
+   tasks:
+
+    - name: Install script
+      template:
+        src: files/testweb.sh
+        dest: /home/ansible-admin/testweb.sh
+        mode: 0777
+    - name: Line test
+      lineinfile:
+        path: /home/ansible-admin/testweb.sh
+        insertafter: EOF
+        line: "{{ item }}"
+        state: present
+      with_items:
+      - 'date & >> /home/ansible-admin/web.log'
+      - 'nginx -t & >> /home/ansible-admin/web.log'
+    - name: nginx cron
+      cron:
+        name: "cron script"
+        minute: "*/2"
+        job: "/home/ansible-admin/testweb.sh > /dev/null"
